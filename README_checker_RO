@@ -1,0 +1,8 @@
+Executabilul trebuie să se numească a.out. Primeşte ca parametru în linia de 
+comandă indicele testului pe care vreţi să îl rulaţi.
+
+Ex: ./a.out 10
+
+pentru a rula testul test_10.txt din folderul tests.
+
+Pentru a rula toate testele, executaţi: ./run_tests.sh

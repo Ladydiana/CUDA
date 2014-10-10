@@ -1,0 +1,26 @@
+Nume:	Culincu Diana Cristina
+Grupa:	341C2
+Titlu:	Tema 4 ASC
+
+
+
+
+Implemetare:
+	
+	Pentru grafice imi printez rezultatele rularii testelor intr-un fisier graphs.out astfel:
+	pe prima coloana rezultatele de la unshared
+	pe a doua rezultatele de la shared
+	pe a treia dimensiunea width*height a matricii
+	pe a patra rezultatele de la gold	
+	Graficele le-am facut pe local cu scripturile all.sh unshared.sh si shared.sh (pe fep nu au vrut sa-mi mearga- probabil ca am uitat sa incarc o librarie pentru gnuplot) si sunt: 
+* unshared.png - comparatie intre  CPU gold si cuda-unshared - se observa(evident) ca pe GPU timpul de rulare e muuuuult mai mic
+* shared.png - comparatie intre CPU gold si cuda-shared - se observa (evident) ca pe GPU timpul de rulare e muuuuuuuuult mai mic
+* cuda.png - comparatie intre performantele shared si cele unshared - se observa ca shared are un timp de rulare mult mai mic ca unshared, pentru ca in cadrul unui bloc incarcat in memoria locala datele sunt refolosite, in loc sa fie reincarcate si recitite din memoria globala ca in cazul unshared.
+
+	Inainte de apelarea kernelului, am verificat ca dimensiunea gridului sa fie suficienta pentru procesarea intregii matrici.
+
+	Pentru implementarea cu kernel unshared am urmat exemplul din matmul unshared si am folosit loop unrolling, calculand rezultatul in functie de numarul corespunzator randului si coloanei (row si col ca in matmul unshared).
+
+	Implementarea cu kernel unshared a fost mai complicata, intrucat e destul de greu sa faci debugging in kernel. Printre problemele pe care le-am intampinat au fost: erau perioade cand desi imi punea valorile in matricea P unde trebuia, cumva inapoi pe host imi ajungea ca P este 0 peste tot; memset pe device nu initializa cu 0 si a trebuit explicit sa pun eu 0 acolo.
+	Pentru implementare m-am uitat pe un exemplu de pe stack overflow si de pe google code (numai uni-shared), pe care l-am adaptat astfel incat sa folosesc ambele matrice shared. Dimensiunea matricei kernel As este simplu BLOCK_SIZExBLOCK_SIZE, iar cea a matricei Bs pe care aplicam convolutia este (BLOCK_SIZE+4)x(BLOCK_SIZE+4) (pentru ca avem nevoie sa o bordam cu 2 la stanga si sus pentru tipul nostru de convolutie aplicat). Alocarea valorilor in matricea Bs se face in doua etape pentru ca dimensiunea lui Bs este mai mare decat dimensiunea unui bloc si fiecare thread trebuie sa puna 2 elemente (din memoria locala in cea shared). In prima etapa se incarca un numar de elemente de dimensiunea blocului, iar in a doua etapa restul. Pentru ca Bs e mai mare decat dimensiunea blocului, trebuie sa shiftam coordonatele de unde luam valorile. Pentru incarcare As nu e nevoie decat de o singura etapa fara shiftare de coordonate din memoria globala. In rest inmultirea se face la fel ca la unshared.  
+
